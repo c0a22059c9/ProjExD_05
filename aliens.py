@@ -25,6 +25,11 @@ Controls
 
 import random
 import os
+import math
+import random
+import sys
+import time
+
 
 # import basic pygame modules
 import pygame as pg
@@ -39,20 +44,23 @@ MAX_SHOTS = 2  # most player bullets onscreen
 ALIEN_ODDS = 22  # chances a new alien appears
 BOMB_ODDS = 60  # chances a new bomb will drop
 ALIEN_RELOAD = 12  # frames between new aliens
-SCREENRECT = pg.Rect(0, 0, 640, 480)
+SCREENRECT = pg.Rect(0, 0, 1600, 900)
+WIDTH = 1600  # ゲームウィンドウの幅
+HEIGHT = 900  # ゲームウィンドウの高さ
 SCORE = 0
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 
 
-def load_image(file):
-    """loads an image, prepares it for play"""
-    file = os.path.join(main_dir, "data", file)
+def load_image(file, folder="fig"):
+    """loads an image from the specified folder"""
+    file_path = os.path.join(main_dir, folder, file)
     try:
-        surface = pg.image.load(file)
+        surface = pg.image.load(file_path)
     except pg.error:
-        raise SystemExit('Could not load image "%s" %s' % (file, pg.get_error()))
+        raise SystemExit(f'Could not load image "{file}" from folder "{folder}"')
     return surface.convert()
+
 
 
 def load_sound(file):
@@ -111,7 +119,7 @@ class Player(pg.sprite.Sprite):
 class Alien(pg.sprite.Sprite):
     """An alien space ship. That slowly moves down the screen."""
 
-    speed = 13
+    speed = 8
     animcycle = 12
     images = []
 
@@ -185,7 +193,7 @@ class Shot(pg.sprite.Sprite):
 class Bomb(pg.sprite.Sprite):
     """A bomb the aliens drop."""
 
-    speed = 9
+    speed = 5
     images = []
 
     def __init__(self, alien):
@@ -203,7 +211,7 @@ class Bomb(pg.sprite.Sprite):
         - remove the Bomb.
         """
         self.rect.move_ip(0, self.speed)
-        if self.rect.bottom >= 470:
+        if self.rect.bottom >= 900:
             Explosion(self)
             self.kill()
 
@@ -245,13 +253,16 @@ def main(winstyle=0):
 
     # Load images, assign to sprite classes
     # (do this before the classes are used, after screen setup)
-    img = load_image("player1.gif")
-    Player.images = [img, pg.transform.flip(img, 1, 0)]
-    img = load_image("explosion1.gif")
+    # Load images, assign to sprite classes
+    # (do this before the classes are used, after screen setup)
+    img = load_image("3.png", folder="fig")
+    Player.images = [img, pg.transform.flip(img, 0, 0)]
+    img = load_image("explosion1.gif", folder="fig")
     Explosion.images = [img, pg.transform.flip(img, 1, 1)]
-    Alien.images = [load_image(im) for im in ("alien1.gif", "alien2.gif", "alien3.gif")]
-    Bomb.images = [load_image("bomb.gif")]
-    Shot.images = [load_image("shot.gif")]
+    Alien.images = [load_image(im, folder="fig") for im in ("alien1.gif", "alien2.gif", "alien3.gif")]
+    Bomb.images = [load_image("bomb.gif", folder="fig")]
+    Shot.images = [load_image("shot.gif", folder="fig")]
+
 
     # decorate the game window
     icon = pg.transform.scale(Alien.images[0], (32, 32))
@@ -260,7 +271,7 @@ def main(winstyle=0):
     pg.mouse.set_visible(0)
 
     # create the background, tile the bgd image
-    bgdtile = load_image("background.gif")
+    bgdtile = load_image("pg_bg.jpg")
     background = pg.Surface(SCREENRECT.size)
     for x in range(0, SCREENRECT.width, bgdtile.get_width()):
         background.blit(bgdtile, (x, 0))
