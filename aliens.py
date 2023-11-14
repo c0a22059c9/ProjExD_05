@@ -97,6 +97,7 @@ class Alien(pg.sprite.Sprite):
         self.rect.left = SCREENRECT.left
         self.facing = random.choice((1,-1)) * Alien.speed
         self.frame = 0
+        self.space_pressed = False  # space キーが押されているかどうかを追跡
 
     def update(self):
         self.rect.move_ip(self.facing, 0)
@@ -106,6 +107,49 @@ class Alien(pg.sprite.Sprite):
             self.rect = self.rect.clamp(SCREENRECT)
         self.frame = self.frame + 1
         self.image = self.images[self.frame//self.animcycle%3]
+
+def handle_input(self):
+        keystate = pg.key.get_pressed()
+        direction = keystate[pg.K_RIGHT] - keystate[pg.K_LEFT]
+        self.move(direction)
+
+        # space キーの状態を追跡
+        if keystate[pg.K_SPACE] and len(shots) < MAX_SHOTS:
+            if not self.space_pressed:  # space キーが以前は押されていない場合
+                self.space_pressed = True
+                self.shoot_big_shot()  # 大きな弾を発射
+        else:
+            self.space_pressed = False
+
+        if not player.reloading:
+            # 弾を通常のサイズで発射
+            if keystate[pg.K_SPACE] and len(shots) < MAX_SHOTS:
+                Shot(self.gunpos())
+                if pg.mixer:
+                    shoot_sound.play()
+                self.reloading = True
+            if not keystate[pg.K_SPACE]:
+                self.reloading = False
+
+
+class BigShot(pg.sprite.Sprite):
+    """大きな弾を表すクラス。"""
+
+    speed = -8  # 大きな弾の速度
+    images = []
+
+    def __init__(self, pos):
+        pg.sprite.Sprite.__init__(self, self.containers)
+        self.image = self.images[0]
+        self.rect = self.image.get_rect(midbottom=pos)
+
+    def update(self):
+        """大きな弾のアップデート。毎フレーム呼び出されます。"""
+        self.rect.move_ip(0, self.speed)
+        if self.rect.top <= 0:
+            self.kill()
+
+
 
 class Explosion(pg.sprite.Sprite):
     defaultlife = 12
@@ -191,7 +235,7 @@ def main(winstyle=0):
     # Decorate the game window
     icon = pg.transform.scale(Alien.images[0], (32, 32))
     pg.display.set_icon(icon)
-    pg.display.set_caption('Pygame Aliens')
+    pg.display.set_caption('holiday2')
     pg.mouse.set_visible(0)
 
     # Create the background
@@ -201,6 +245,9 @@ def main(winstyle=0):
         background.blit(bgdtile, (x, 0))
     screen.blit(background, (0, 0))
     pg.display.flip()
+
+    if pg.mixer:
+        music = os.path.join(main_dir, "data", "8-bit_Aggressive1.mp3")
 
     # Initialize game groups
     aliens = pg.sprite.Group()
