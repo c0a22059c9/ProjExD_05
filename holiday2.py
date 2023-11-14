@@ -23,6 +23,7 @@ def load_image(file):
         raise SystemExit(f'Could not load image "{file}" {pg.get_error()}')
     return surface.convert()
 
+
 def load_sound(file):
     """音声を読み込む。pygameミキサーが無効な場合はNoneを返す"""
     if not pg.mixer:
@@ -34,6 +35,7 @@ def load_sound(file):
     except pg.error:
         print(f"Warning, unable to load, {file_path}")
     return None
+
 
 class Player(pg.sprite.Sprite):
     speed = 10
@@ -104,7 +106,6 @@ class BigShot(pg.sprite.Sprite):
             self.kill()
 
         
-
 class Alien(pg.sprite.Sprite):
     speed = 13
     animcycle = 12
@@ -157,7 +158,6 @@ class Explosion(pg.sprite.Sprite):
             self.kill()
 
 
-
 class Shot(pg.sprite.Sprite):
     speed = -9 
     images = []
@@ -171,6 +171,7 @@ class Shot(pg.sprite.Sprite):
         self.rect.move_ip(0, self.speed)
         if self.rect.top <= 0 or self.rect.bottom >= SCREENRECT.height:
             self.kill()
+
 
 class Bomb(pg.sprite.Sprite):
     speed = 9
@@ -223,6 +224,7 @@ class Firework(pg.sprite.Sprite):
         if self.rect.bottom <= 0:
             Explosion(self)
             self.kill()
+
 
 def main(winstyle=0):
     # Initialize pygame
@@ -484,7 +486,6 @@ def main(winstyle=0):
 
     
     pg.quit()
-
 
 
 if __name__ == "__main__":
