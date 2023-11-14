@@ -1,36 +1,12 @@
-#!/usr/bin/env python
-""" pygame.examples.aliens
-
-Shows a mini game where you have to defend against aliens.
-
-What does it show you about pygame?
-
-* pg.sprite, the difference between Sprite and Group.
-* dirty rectangle optimization for processing for speed.
-* music with pg.mixer.music, including fadeout
-* sound effects with pg.Sound
-* event processing, keyboard handling, QUIT handling.
-* a main loop frame limited with a game clock from pg.time.Clock
-* fullscreen switching.
-
-
-Controls
---------
-
-* Left and right arrows to move.
-* Space bar to shoot
-* f key to toggle between fullscreen.
-
-"""
 import random
 import os
 
+# import basic pygame modules
 import pygame as pg
 
 # see if we can load more than standard BMP
 if not pg.image.get_extended():
     raise SystemExit("Sorry, extended image module required")
-
 
 # game constants
 MAX_SHOTS = 2  # most player bullets onscreen
@@ -43,11 +19,11 @@ SCORE = 0
 INVINCIBILITY_DURATION = 10000  # 10 seconds
 INVINCIBLE = False
 INVINCIBILITY_END_TICK = 0
+
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 
 
 def load_image(file):
-
     """Loads an image and prepares it for rendering."""
     file_path = os.path.join(main_dir, "data", file)
     try:
@@ -112,10 +88,8 @@ class Player(pg.sprite.Sprite):
     def gunpos(self):
         pos = self.facing < 0 and self.rect.topright or self.rect.topleft
         return pos[0] + self.gun_offset+66 , pos[1] - 1
-        pos = self.facing * self.gun_offset + self.rect.centerx
-        return pos, self.rect.top
     
-
+    """
     def handle_input(self):
         keystate = pg.key.get_pressed()
         direction = keystate[pg.K_RIGHT] - keystate[pg.K_LEFT]
@@ -138,7 +112,12 @@ class Player(pg.sprite.Sprite):
                 self.reloading = True
             if not keystate[pg.K_SPACE]:
                 self.reloading = False
+    """
+    def update(self):
+        self.reloading = max(0, self.reloading-1)
 
+        if self.invincible and pg.time.get_ticks() > self.invincibility_end_tick:
+            self.invincible = False
 
 class BigShot(pg.sprite.Sprite):
     """大きな弾を表すクラス。"""
@@ -218,19 +197,15 @@ class Explosion(pg.sprite.Sprite):
 
 class Shot(pg.sprite.Sprite):
     """a bullet the Player sprite fires."""
-    speed = -11
+    speed = -9
     images = []
 
     def __init__(self, pos):
         pg.sprite.Sprite.__init__(self, self.containers)
         self.image = self.images[0]
-        #self.image = pg.transform.rotozoom(pg.image.load("ex05/data/shot.gif"), 0.0, 1.0)
         self.rect = self.image.get_rect(midbottom=pos)
 
     def update(self):
-        """called every time around the game loop.
-        Every tick we move the shot upwards.
-        """
         self.rect.move_ip(0, self.speed)
         if self.rect.top <= 0 or self.rect.bottom >= SCREENRECT.height:
             self.kill()
@@ -242,8 +217,6 @@ class Bomb(pg.sprite.Sprite):
     def __init__(self, alien):
         pg.sprite.Sprite.__init__(self, self.containers)
         self.image = self.images[0]
-        #self.image = pg.transform.rotozoom(pg.image.load("ex05/data/bomb.gif"), 0.0, 1.0)
-        self.rect = self.image.get_rect(midbottom=alien.rect.move(0, 5).midbottom)
         self.rect = self.image.get_rect(midtop=alien.rect.midbottom)
 
     def update(self):
@@ -309,7 +282,7 @@ def main(winstyle=0):
     # Decorate the game window
     icon = pg.transform.scale(Alien.images[0], (32, 32))
     pg.display.set_icon(icon)
-    pg.display.set_caption('Pygame Aliens')
+    pg.display.set_caption('holiday2')
     pg.mouse.set_visible(0)
 
     # Create the background
