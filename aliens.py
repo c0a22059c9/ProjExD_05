@@ -108,7 +108,6 @@ class Player(pg.sprite.Sprite):
         return pos[0] + self.gun_offset+66 , pos[1] - 1
     
     
-    
     def update(self):
         self.reloading = max(0, self.reloading-1)
 
@@ -193,8 +192,7 @@ class Explosion(pg.sprite.Sprite):
 
 
 class Shot(pg.sprite.Sprite):
-    """a bullet the Player sprite fires."""
-    speed = -9
+    speed = -9 
     images = []
 
     def __init__(self, pos):
