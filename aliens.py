@@ -43,6 +43,26 @@ SCORE = 0
 INVINCIBILITY_DURATION = 10000  # 10 seconds
 INVINCIBLE = False
 INVINCIBILITY_END_TICK = 0
+
+
+import pygame as pg
+
+# see if we can load more than standard BMP
+if not pg.image.get_extended():
+    raise SystemExit("Sorry, extended image module required")
+
+
+# game constants
+MAX_SHOTS = 2  # most player bullets onscreen
+ALIEN_ODDS = 22  # chances a new alien appears
+BOMB_ODDS = 60  # chances a new bomb will drop
+ALIEN_RELOAD = 12  # frames between new aliens
+SHOT_RELOAD = 12
+SCREENRECT = pg.Rect(0, 0, 640, 480)
+SCORE = 0
+INVINCIBILITY_DURATION = 10000  # 10 seconds
+INVINCIBLE = False
+INVINCIBILITY_END_TICK = 0
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 
 
@@ -114,8 +134,8 @@ class Player(pg.sprite.Sprite):
         return pos[0] + self.gun_offset+66 , pos[1] - 1
         pos = self.facing * self.gun_offset + self.rect.centerx
         return pos, self.rect.top
-    
 
+      
     def handle_input(self):
         keystate = pg.key.get_pressed()
         direction = keystate[pg.K_RIGHT] - keystate[pg.K_LEFT]
@@ -216,6 +236,7 @@ class Explosion(pg.sprite.Sprite):
             self.kill()
 
 
+
 class Shot(pg.sprite.Sprite):
     """a bullet the Player sprite fires."""
     speed = -11
@@ -278,6 +299,14 @@ class Firework(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.containers)
         if len(self.images) > 0:
             self.image = self.images[0]
+             #self.image = pg.transform.rotozoom(pg.image.load("ex05/data/hanabi.png"), 0.0, 1.0)
+            self.rect = self.image.get_rect(midbottom=pos)
+
+    def update(self):
+        """Called every time around the game loop.
+
+        Every tick we move the firework upwards.
+        """
         self.rect = self.image.get_rect(midbottom=pos)
 
     def update(self):
@@ -285,8 +314,6 @@ class Firework(pg.sprite.Sprite):
         if self.rect.bottom <= 0:
             Explosion(self)
             self.kill()
-
-
 
 def main(winstyle=0):
     # Initialize pygame
@@ -345,6 +372,13 @@ def main(winstyle=0):
     Explosion.containers = all
     Score.containers = all
     Firework.containers = fireworks, all
+
+    # 画面の設定
+    fullscreen = False
+    winstyle = 0  # |FULLSCREEN
+    bestdepth = pg.display.mode_ok(SCREENRECT.size, winstyle, 32)
+    screen = pg.display.set_mode(SCREENRECT.size, winstyle, bestdepth)
+
 
     # 画面の設定
     fullscreen = False
@@ -520,6 +554,7 @@ def main(winstyle=0):
         pg.mixer.music.fadeout(1000)
     pg.time.wait(1000)
     pg.quit()
+
 
 
 if __name__ == "__main__":
