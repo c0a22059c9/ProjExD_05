@@ -1,7 +1,6 @@
 import random
 import os
 
-# import basic pygame modules
 import pygame as pg
 
 # see if we can load more than standard BMP
@@ -106,13 +105,35 @@ class Player(pg.sprite.Sprite):
     def gunpos(self):
         pos = self.facing < 0 and self.rect.topright or self.rect.topleft
         return pos[0] + self.gun_offset+66 , pos[1] - 1
-    
+    def handle_input(self):
+        keystate = pg.key.get_pressed()
+        direction = keystate[pg.K_RIGHT] - keystate[pg.K_LEFT]
+        self.move(direction)
+
+        # space キーの状態を追跡
+        if keystate[pg.K_SPACE] and len(shots) < MAX_SHOTS:
+            if not self.space_pressed:  # space キーが以前は押されていない場合
+                self.space_pressed = True
+                self.shoot_big_shot()  # 大きな弾を発射
+        else:
+            self.space_pressed = False
+
+        if not player.reloading:
+                # 弾を通常のサイズで発射
+            if keystate[pg.K_SPACE] and len(shots) < MAX_SHOTS:
+                Shot(self.gunpos())
+                if pg.mixer:
+                    shoot_sound.play()
+                self.reloading = True
+            if not keystate[pg.K_SPACE]:
+                self.reloading = False
     
     def update(self):
         self.reloading = max(0, self.reloading-1)
 
         if self.invincible and pg.time.get_ticks() > self.invincibility_end_tick:
             self.invincible = False
+
 
 class BigShot(pg.sprite.Sprite):
     """大きな弾を表すクラス。"""
