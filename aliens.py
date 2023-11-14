@@ -44,7 +44,27 @@ INVINCIBILITY_DURATION = 10000  # 10 seconds
 INVINCIBLE = False
 INVINCIBILITY_END_TICK = 0
 
+
+import pygame as pg
+
+# see if we can load more than standard BMP
+if not pg.image.get_extended():
+    raise SystemExit("Sorry, extended image module required")
+
+
+# game constants
+MAX_SHOTS = 2  # most player bullets onscreen
+ALIEN_ODDS = 22  # chances a new alien appears
+BOMB_ODDS = 60  # chances a new bomb will drop
+ALIEN_RELOAD = 12  # frames between new aliens
+SHOT_RELOAD = 12
+SCREENRECT = pg.Rect(0, 0, 640, 480)
+SCORE = 0
+INVINCIBILITY_DURATION = 10000  # 10 seconds
+INVINCIBLE = False
+INVINCIBILITY_END_TICK = 0
 main_dir = os.path.split(os.path.abspath(__file__))[0]
+
 
 def load_image(file):
 
@@ -55,6 +75,7 @@ def load_image(file):
     except pg.error:
         raise SystemExit(f'Could not load image "{file_path}" {pg.get_error()}')
     return surface.convert()
+
 
 def load_sound(file):
     """Load sound effects. If pygame mixer is not available, return None."""
@@ -76,6 +97,7 @@ class Player(pg.sprite.Sprite):
     images = []
     facing = 1  # Add this line. Default facing direction is right (1).
 
+
     def __init__(self):
         pg.sprite.Sprite.__init__(self, self.containers)
         self.image = pg.transform.rotozoom(pg.image.load("ex05/data/player1.gif"), 0.0, 1.0)
@@ -89,6 +111,7 @@ class Player(pg.sprite.Sprite):
         self.facing = -1
         self.space_pressed = False  # space キーが押されているかどうかを追跡self.space_pressed
 
+
     def move(self, direction):
         if direction: 
             self.rect.move_ip(direction*self.speed, 0)
@@ -100,6 +123,7 @@ class Player(pg.sprite.Sprite):
                 self.image = self.images[0]
                 self.facing = 1  # Update the facing attribute
 
+
     def activate_invincibility(self, duration):
         self.invincible = True
         self.invincibility_end_tick = pg.time.get_ticks() + duration
@@ -110,7 +134,8 @@ class Player(pg.sprite.Sprite):
         return pos[0] + self.gun_offset+66 , pos[1] - 1
         pos = self.facing * self.gun_offset + self.rect.centerx
         return pos, self.rect.top
-    
+
+      
     def handle_input(self):
         keystate = pg.key.get_pressed()
         direction = keystate[pg.K_RIGHT] - keystate[pg.K_LEFT]
@@ -212,10 +237,6 @@ class Explosion(pg.sprite.Sprite):
 
 
 
-
-class Shot(pg.sprite.Sprite):
-    speed = -9 
-
 class Shot(pg.sprite.Sprite):
     """a bullet the Player sprite fires."""
     speed = -11
@@ -251,6 +272,7 @@ class Bomb(pg.sprite.Sprite):
         if self.rect.bottom >= SCREENRECT.height:
             self.kill()
 
+
 class Score(pg.sprite.Sprite):
     def __init__(self):
         pg.sprite.Sprite.__init__(self)
@@ -261,6 +283,7 @@ class Score(pg.sprite.Sprite):
         self.update()
         self.rect = self.image.get_rect().move(10, 450)
 
+
     def update(self):
         if SCORE != self.lastscore:
             self.lastscore = SCORE
@@ -269,8 +292,6 @@ class Score(pg.sprite.Sprite):
 
 
 class Firework(pg.sprite.Sprite):
-    """Represents a firework that can be launched at random intervals."""
-
     speed = -10
     images = []
 
@@ -286,6 +307,9 @@ class Firework(pg.sprite.Sprite):
 
         Every tick we move the firework upwards.
         """
+        self.rect = self.image.get_rect(midbottom=pos)
+
+    def update(self):
         self.rect.move_ip(0, self.speed)
         if self.rect.bottom <= 0:
             Explosion(self)
@@ -348,6 +372,13 @@ def main(winstyle=0):
     Explosion.containers = all
     Score.containers = all
     Firework.containers = fireworks, all
+
+    # 画面の設定
+    fullscreen = False
+    winstyle = 0  # |FULLSCREEN
+    bestdepth = pg.display.mode_ok(SCREENRECT.size, winstyle, 32)
+    screen = pg.display.set_mode(SCREENRECT.size, winstyle, bestdepth)
+
 
     # 画面の設定
     fullscreen = False
@@ -523,6 +554,8 @@ def main(winstyle=0):
         pg.mixer.music.fadeout(1000)
     pg.time.wait(1000)
     pg.quit()
+
+
 
 if __name__ == "__main__":
     main()
